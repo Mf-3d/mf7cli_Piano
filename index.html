@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <link rel="stylesheet" href="index.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Yomogi&display=swap" rel="stylesheet">
+        <script src="https://g200kg.github.io/webaudio-pianoroll/webaudio-pianoroll.js"></script>
+        <script>
+            timebase=16;
+            actx=new AudioContext();
+            osc=actx.createOscillator();
+            gain=actx.createGain();
+            gain.gain.value=0;
+            osc.type="sawtooth";
+            osc.start();
+            osc.connect(gain).connect(actx.destination);
+            
+            function Callback(ev){
+                osc.detune.setValueAtTime((ev.n-69)*100,ev.t);
+                gain.gain.setTargetAtTime(0.5,ev.t,0.005);
+                gain.gain.setTargetAtTime(0,ev.g,0.1);
+            }
+            function Play(){
+                actx.resume();
+                document.getElementById("proll").play(actx,Callback);
+            }
+            function Layout(k){
+                switch(k.id){
+                case "xrange":
+                    document.getElementById("proll").xrange=k.value*timebase;
+                    break;
+                case "xoffset":
+                    document.getElementById("proll").xoffset=k.value*timebase;
+                    break;
+                case "yrange":
+                    document.getElementById("proll").yrange=k.value;
+                    break;
+                case "yoffset":
+                    document.getElementById("proll").yoffset=k.value;
+                    break;
+                }
+            }
+            </script>
+    </head>
+    <body>
+        <iframe src="piano.html"></iframe>
+        <br>
+        <div>
+            <webaudio-pianoroll width="1400" height="450" id="proll"></webaudio-pianoroll>
+            <button onclick="document.getElementById('mml').value=(document.getElementById('proll').getMMLString())">getMMLString</button>
+            <button onclick="document.getElementById('proll').setMMLString(document.getElementById('mml').value)">setMMLString</button>
+            <button onclick="Play()">Play</button>
+            <button onclick="document.getElementById('proll').stop()">Stop</button>
+            <br/>
+            <textarea id="mml" rows="10" cols="80"></textarea>
+        </div>
+    </body>
+</html>
